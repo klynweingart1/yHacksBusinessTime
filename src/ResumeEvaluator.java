@@ -57,6 +57,17 @@ public class ResumeEvaluator {
 		else
 			return gpa2;
 	}
+	
+	public String mostLikelyACT(String act1, String act2) {
+		if (act1 == null)
+			return act2;
+		if (act2 == null)
+			return act1;
+		if (act1.contains("."))
+			return act2;
+		else
+			return act1;
+	}
 
 	public void findWordFrequencies() {
 		String strArray[] = content.split("[^a-zA-Z0-9']+");
@@ -68,7 +79,7 @@ public class ResumeEvaluator {
 	}
 	
 	public String findGPA() {
-		Pattern gpaPattern = Pattern.compile("(GPA|grade point average)");
+		Pattern gpaPattern = Pattern.compile("(GPA|grade point average|GPA:)");
 		Matcher gpaMatcher = gpaPattern.matcher(content);
 		// only look at first instance
 		if (gpaMatcher.find()) {	        
@@ -80,6 +91,21 @@ public class ResumeEvaluator {
 			return null;
 		}
 	}
+	
+	public String findACT() {
+		Pattern actPattern = Pattern.compile("(ACT|ACT:|ACT Score:)");
+		Matcher actMatcher = actPattern.matcher(content);
+		// only look at first instance
+		if (actMatcher.find()) {	        
+	        String prevString = numberWithinFiveChars(actMatcher.start(), -1);
+	        String nextString = numberWithinFiveChars(actMatcher.end(), 1);
+	        String act = mostLikelyACT(prevString, nextString);
+	        return act;
+		} else {
+			return null;
+		}
+	}
+	
 	public void universityFileToHashMap() throws NumberFormatException, IOException {
 		FileReader input = new FileReader(universityFile);
 		BufferedReader bufRead = new BufferedReader(input);
@@ -106,7 +132,7 @@ public class ResumeEvaluator {
 	
 	public static void main(String[] args) throws JSONException {
 		PdfParser parser = new PdfParser();
- 		String jsonString = parser.post1("weingart_resume.pdf");
+ 		String jsonString = parser.post1("TRASH_ACT.pdf");
  		String content = parser.extractText(jsonString);
 
 		ResumeEvaluator ev = new ResumeEvaluator(content, "CollegeRanksV1.txt");
@@ -118,6 +144,9 @@ public class ResumeEvaluator {
 		System.out.println("resume text: " + ev.content);
 		String gpaString = ev.findGPA();
 		System.out.println(gpaString);
+		String actString = ev.findACT();
+		System.out.println(actString);
+		
 	}
 
 }
