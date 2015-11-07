@@ -1,11 +1,8 @@
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.*;
-
-import com.sun.jna.platform.win32.WinDef.CHAR;
 
 import java.io.*;
 
