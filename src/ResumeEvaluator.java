@@ -9,7 +9,11 @@ import com.sun.jna.platform.win32.WinDef.CHAR;
 import java.io.*;
 
 public class ResumeEvaluator {
+	String content;
 	
+	public ResumeEvaluator(String content) {
+		this.content = content;
+	}
 	/**
 	 * @param content: text we're passing in
 	 * @param index: index of the word "GPA"
@@ -41,6 +45,10 @@ public class ResumeEvaluator {
 		int end = index;
 		int[] pair = {start, end}; 
 		return pair;
+	}
+	
+	public void findWordFrequencies() {
+		
 	}
 	
 	public String findGPA(String resumeContent) {
@@ -86,7 +94,7 @@ public class ResumeEvaluator {
 			return;
 		}
 		System.out.println(resumeContent);
-		ResumeEvaluator ev = new ResumeEvaluator();
+		ResumeEvaluator ev = new ResumeEvaluator(resumeContent);
 		String gpaString = ev.findGPA(resumeContent);
 		System.out.println(gpaString);
 	}
