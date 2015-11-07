@@ -2,6 +2,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.regex.*;
 
 import com.sun.jna.platform.win32.WinDef.CHAR;
@@ -10,6 +11,7 @@ import java.io.*;
 
 public class ResumeEvaluator {
 	String content;
+	HashMap<String, Integer> wordFrequencies = new HashMap<String, Integer>();
 	
 	public ResumeEvaluator(String content) {
 		this.content = content;
@@ -48,7 +50,12 @@ public class ResumeEvaluator {
 	}
 	
 	public void findWordFrequencies() {
-		
+		String strArray[] = content.split("[^a-zA-Z0-9']+");
+		for(String str: strArray) {
+			Integer freq = wordFrequencies.get(str);
+			if(freq == null) wordFrequencies.put(str, 0);
+			else wordFrequencies.put(str, freq + 1);
+		}
 	}
 	
 	public String findGPA(String resumeContent) {
