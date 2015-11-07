@@ -13,7 +13,7 @@ public class ResumeEvaluator {
 	public ResumeEvaluator(String content) {
 		this.content = content;
 	}
-	public String numberWithinFiveChars(String content, int index, int direction) {
+	public String numberWithinFiveChars(int index, int direction) {
 		int count = 0;
 		
 		//find start of GPA
@@ -63,13 +63,13 @@ public class ResumeEvaluator {
 		}
 	}
 	
-	public String findGPA(String resumeContent) {
+	public String findGPA() {
 		Pattern gpaPattern = Pattern.compile("(GPA|grade point average)");
-		Matcher gpaMatcher = gpaPattern.matcher(resumeContent);
+		Matcher gpaMatcher = gpaPattern.matcher(content);
 		// only look at first instance
 		if (gpaMatcher.find()) {	        
-	        String prevString = numberWithinFiveChars(resumeContent, gpaMatcher.start(), -1);
-	        String nextString = numberWithinFiveChars(resumeContent, gpaMatcher.end(), 1);
+	        String prevString = numberWithinFiveChars(gpaMatcher.start(), -1);
+	        String nextString = numberWithinFiveChars(gpaMatcher.end(), 1);
 	        String gpa = mostLikelyGPA(prevString, nextString);
 	        return gpa;
 		} else {
@@ -77,7 +77,7 @@ public class ResumeEvaluator {
 		}
 	}
 	
-	public void evaluateResume(String resumeContent) {
+	public void evaluateResume() {
 		
 	}
 	
@@ -98,7 +98,7 @@ public class ResumeEvaluator {
 		}
 		System.out.println(resumeContent);
 		ResumeEvaluator ev = new ResumeEvaluator(resumeContent);
-		String gpaString = ev.findGPA(resumeContent);
+		String gpaString = ev.findGPA();
 		System.out.println(gpaString);
 	}
 
