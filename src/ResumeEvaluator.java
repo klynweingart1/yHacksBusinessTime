@@ -53,7 +53,7 @@ public class ResumeEvaluator {
 		String strArray[] = content.split("[^a-zA-Z0-9']+");
 		for(String str: strArray) {
 			Integer freq = wordFrequencies.get(str);
-			if(freq == null) wordFrequencies.put(str, 0);
+			if(freq == null) wordFrequencies.put(str, 1);
 			else wordFrequencies.put(str, freq + 1);
 		}
 	}
