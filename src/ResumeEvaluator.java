@@ -3,15 +3,19 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.regex.*;
-
 import java.io.*;
 
+import org.json.JSONException;
+
 public class ResumeEvaluator {
+	String universityFile;
 	String content;
 	HashMap<String, Integer> wordFrequencies = new HashMap<String, Integer>();
-	
-	public ResumeEvaluator(String content) {
+	HashMap<String, Integer> universityRanking = new HashMap<String, Integer>();
+
+	public ResumeEvaluator(String content, String universityFile) {
 		this.content = content;
+		this.universityFile = universityFile;
 	}
 	public String numberWithinFiveChars(int index, int direction) {
 		int count = 0;
@@ -76,6 +80,19 @@ public class ResumeEvaluator {
 			return null;
 		}
 	}
+	public void universityFileToHashMap() throws NumberFormatException, IOException {
+		FileReader input = new FileReader(universityFile);
+		BufferedReader bufRead = new BufferedReader(input);
+		String myLine = null;
+
+		while ( (myLine = bufRead.readLine()) != null)
+		{    
+		    String[] array = myLine.split("#");
+		    // check to make sure you have valid data
+		    universityRanking.put(array[0], Integer.parseInt(array[1]));
+		}
+		bufRead.close();
+	}
 	
 	public void evaluateResume() {
 		
@@ -87,17 +104,18 @@ public class ResumeEvaluator {
 		return new String(encoded, encoding);
 	}
 	
-	public static void main(String[] args) {
-		Charset utf8charset = Charset.forName("UTF-8");
-		String resumeContent;
-		try {
-			resumeContent = readFile("elijahResumeContentGPA.txt", utf8charset);
-		} catch (IOException exception) {
-			System.out.println("Unable to read file");
-			return;
+	public static void main(String[] args) throws JSONException {
+		PdfParser parser = new PdfParser();
+ 		String jsonString = parser.post1("weingart_resume.pdf");
+ 		String content = parser.extractText(jsonString);
+
+		ResumeEvaluator ev = new ResumeEvaluator(content, "CollegeRanksV1.txt");
+		try{
+			ev.universityFileToHashMap();
+		} catch(Exception e) {
+			System.out.println("Error parsing university file: \n" + e);
 		}
-		System.out.println(resumeContent);
-		ResumeEvaluator ev = new ResumeEvaluator(resumeContent);
+		System.out.println("resume text: " + ev.content);
 		String gpaString = ev.findGPA();
 		System.out.println(gpaString);
 	}
