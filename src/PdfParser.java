@@ -86,7 +86,7 @@ public class PdfParser {
 	
 	public static void main(String[] args) throws JSONException {
 		PdfParser parser = new PdfParser();
-		String str = parser.post1("/Users/katelynweingart/Documents/workspace/YHack/weingart_resume.pdf");
+		String str = parser.post1("weingart_resume.pdf");
 		System.out.println(str);
 	}
 }
