@@ -16,39 +16,47 @@ public class ResumeEvaluator {
 	public ResumeEvaluator(String content) {
 		this.content = content;
 	}
+	public String numberWithinFiveChars(String content, int index, int direction) {
+		int count = 0;
+		
+		//find start of GPA
+		while (!Character.isDigit(content.charAt(index))) {
+			index += direction;
+			count++;
+			if(count > 5) return null;
+		}
+		//find end of GPA
+		int startIndex = index; //could be start or end of GPA
+		while ((Character.isDigit(content.charAt(index)) || content.charAt(index) == '.')) {
+			index += direction;
+			count++;
+		}
+		int secondIndex = index;
+		if (direction == 1) {
+			return content.substring(startIndex, secondIndex);
+		} else {
+			return content.substring(secondIndex + 1, startIndex + 1);
+		}
+		
+	}
+	
 	/**
-	 * @param content: text we're passing in
-	 * @param index: index of the word "GPA"
-	 * @param direction: direction to search in (-1 or 1)
-	 * @return start and end indices
-	 *
-	public int[] findClosestNumber(String content, int index, int direction) {
-		while (!Character.isDigit(content.charAt(index))) {
-			index += direction;
-		}
-		int start = index;
-		while ((Character.isDigit(content.charAt(index)) || content.charAt(index) == '.')) {
-			index += direction;
-		}
-		int end = index;
-		int[] pair = {start, end}; 
-		return pair;
+	 * Given two numbers encoded as strings, which one is the most likely to be the GPA?
+	 * @param gpa1
+	 * @param gpa2
+	 * @return Either gpa1 or gpa2. The logic isn't that spectacular, but it's something.
+	 */
+	public String mostLikelyGPA(String gpa1, String gpa2) {
+		if (gpa1 == null)
+			return gpa2;
+		if (gpa2 == null)
+			return gpa1;
+		if (gpa1.contains("."))
+			return gpa1;
+		else
+			return gpa2;
 	}
-	*/
-	
-	public String findClosestNumber(String content, int index, int direction) {
-		while (!Character.isDigit(content.charAt(index))) {
-			index += direction;
-		}
-		int start = index;
-		while ((Character.isDigit(content.charAt(index)) || content.charAt(index) == '.')) {
-			index += direction;
-		}
-		int end = index;
-		int[] pair = {start, end}; 
-		return pair;
-	}
-	
+
 	public void findWordFrequencies() {
 		String strArray[] = content.split("[^a-zA-Z0-9']+");
 		for(String str: strArray) {
@@ -61,24 +69,15 @@ public class ResumeEvaluator {
 	public String findGPA(String resumeContent) {
 		Pattern gpaPattern = Pattern.compile("(GPA|grade point average)");
 		Matcher gpaMatcher = gpaPattern.matcher(resumeContent);
-		ArrayList<String> gpas = new ArrayList<String>();
-		while (gpaMatcher.find()) {
-	        System.out.print("Start index: " + gpaMatcher.start());
-	        System.out.print(" End index: " + gpaMatcher.end());
-	        System.out.println(" Found: " + gpaMatcher.group());
-	        int[2] prev = findClosestNumber(resumeContent, gpaMatcher.start(), -1);
-	        int[2] next = findClosestNumber(resumeContent, gpaMatcher.end(), 1);
-	        int startIndexPrevNumber = prev[0];
-	        int endIndexPrevNumber = prev[1];
-	        int startIndexNextNumber = next[0];
-	        int endIndexNextNumber = next[1];
-	        String prevString = 
-			gpas.add(gpaMatcher.group(0));
-		}
-		if (gpas.isEmpty())
+		// only look at first instance
+		if (gpaMatcher.find()) {	        
+	        String prevString = numberWithinFiveChars(resumeContent, gpaMatcher.start(), -1);
+	        String nextString = numberWithinFiveChars(resumeContent, gpaMatcher.end(), 1);
+	        String gpa = mostLikelyGPA(prevString, nextString);
+	        return gpa;
+		} else {
 			return null;
-		else
-			return gpas.get(0);
+		}
 	}
 	
 	public void evaluateResume(String resumeContent) {
