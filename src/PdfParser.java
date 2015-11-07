@@ -1,5 +1,8 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
@@ -15,17 +18,31 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class PdfParser {
 
 	private String apikey = "d991691d-4882-4733-9222-0cacd692d58a";
 	private String url = "https://api.havenondemand.com/1/api/sync/extracttext/v1";
+	
 	public CloseableHttpResponse response = null;
+	
+	public String extractText(String json) throws JSONException {
+		 JSONObject result = new JSONObject(json); //Convert String to JSON Object
 
-	public void post1(String fileSrc){
+         JSONArray tokenList = result.getJSONArray("document");
+         JSONObject obj = (JSONObject)tokenList.get(0);
+         String content = obj.getString("content");
+         return content;
+	}
+	
+	public String post1(String fileSrc){
 		
 		CloseableHttpClient httpclient = HttpClients.createDefault();
-		
+	    String str = null;
+
 		try {
 		    HttpPost httppost = new HttpPost(url);
 		
@@ -47,8 +64,9 @@ public class PdfParser {
 			
 			System.out.println(response.getStatusLine());
 			HttpEntity entity = response.getEntity();
+			
 			if (entity != null) {
-			    entity.writeTo(System.out);
+		        str = EntityUtils.toString(entity); 
 			}
 			
 		    }catch(ClientProtocolException cpe){
@@ -69,12 +87,13 @@ public class PdfParser {
 		    	e.printStackTrace();
 		    }
 		}
+		return str;
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws JSONException {
 		PdfParser parser = new PdfParser();
-		parser.post1("/Users/katelynweingart/Documents/workspace/YHack/weingart_resume.pdf");
-		CloseableHttpResponse response = parser.response;
-		System.out.println(response);
+		String str = parser.post1("/Users/katelynweingart/Documents/workspace/YHack/weingart_resume.pdf");
+		String str2 = parser.extractText(str);
+		System.out.println(str);
 	}
 }
