@@ -9,6 +9,8 @@ Clinical
 Field
 Shadowing
 Shadowed
+Cultured
+Assisted
 Experiments
 Experiment
 Procedure

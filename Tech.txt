@@ -78,3 +78,5 @@ Implementing
 Coding
 Coded
 Certified
+Effective
+Efficient
