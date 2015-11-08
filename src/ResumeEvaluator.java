@@ -145,7 +145,7 @@ public class ResumeEvaluator {
 	}
 	
 	public void goodWordFileToHashSet() throws IOException {
-		FileReader input = new FileReader(wordsFolder.concat(generalWordsFileName));
+		FileReader input = new FileReader(wordsFolder + generalWordsFileName);
 		BufferedReader bufRead = new BufferedReader(input);
 		String myLine = null;
 
@@ -156,7 +156,7 @@ public class ResumeEvaluator {
 	}
 	
 	public void specificWordFileToHashSet() throws IOException {
-		FileReader input = new FileReader(wordsFolder.concat(type).concat(".txt"));
+		FileReader input = new FileReader(wordsFolder + type + ".txt");
 		BufferedReader bufRead = new BufferedReader(input);
 		String myLine = null;
 
@@ -201,6 +201,16 @@ public class ResumeEvaluator {
 			ev.universityFileToHashMap();
 		} catch(Exception e) {
 			System.out.println("Error parsing university file: \n" + e);
+		}
+		try{
+			ev.goodWordFileToHashSet();
+		} catch(Exception e) {
+			System.out.println("Error parsing good words file: \n" + e);
+		}
+		try{
+			ev.specificWordFileToHashSet();
+		} catch(Exception e) {
+			System.out.println("Error parsing " + ev.type + " words file: \n" + e);
 		}
 		System.out.println(ev.universityRanking);
 		System.out.println("resume text: " + ev.content);
