@@ -127,20 +127,6 @@ public class ResumeEvaluator {
 		}
 	}
 	
-	public String findACT() {
-		Pattern actPattern = Pattern.compile("(ACT|ACT:|ACT Score:)");
-		Matcher actMatcher = actPattern.matcher(content);
-		// only look at first instance
-		if (actMatcher.find()) {	        
-	        String prevString = numberWithinFiveChars(actMatcher.start(), -1);
-	        String nextString = numberWithinFiveChars(actMatcher.end(), 1);
-	        String act = mostLikelyACT(prevString, nextString);
-	        return act;
-		} else {
-			return null;
-		}
-	}
-	
 	public void universityFileToHashMap() throws NumberFormatException, IOException {
 		FileReader input = new FileReader(universityFile);
 		BufferedReader bufRead = new BufferedReader(input);
