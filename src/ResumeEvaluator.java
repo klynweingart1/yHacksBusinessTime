@@ -1,7 +1,6 @@
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.regex.*;
@@ -10,52 +9,39 @@ import java.io.*;
 import org.json.JSONException;
 
 public class ResumeEvaluator {
-	
-	// Should this be static? Also, could it just be an array? 
-	// We only have three elements and they don't ever change.
-	ArrayList<String> options = new ArrayList<String>();
-	
+		
 	// Instance variables. Should these be private?
-	String type;
-	String content;
-	String[] noWhitespace;
-	double gpa;
-	int numTypos;
+	private String type;
+	private String content;
+	private String[] noWhitespace;
+	private double gpa;
+	private double act;
+	private int numTypos;
 	
-	/* Question: make these static? 
-	 * Thoughts: We only need to load the university file into the HashMap
-	 * once, so I think this should be static. As we have it set up now,
-	 * the goodWords HashSet is general good words plus the words specific
-	 * to the type of resume this is (tech, business, or bio), so this shouldn't
-	 * be static though unless we change how this is structured. 
-	 */
 	HashMap<String, Integer> wordFrequencies = new HashMap<String, Integer>();
-	HashMap<String, Integer> universityRanking = new HashMap<String, Integer>();
-	HashSet<String> goodWords = new HashSet<String>();
+	
+	static HashMap<String, Integer> universityRanking = new HashMap<String, Integer>();
+	static HashSet<String> generalWords = new HashSet<String>();
+	static HashSet<String> techWords = new HashSet<String>();
+	static HashSet<String> businessWords = new HashSet<String>();
+	static HashSet<String> bioWords = new HashSet<String>();
 	
 	static String dictionaryFileName = "dictionary.txt";
+	static HashSet<String> dictionary = null;
 	static String wordsFolder = "words/";
 	static String generalWordsFileName = "general.txt";
 	static String collegeRankingsFileName = "CollegeRanksV1.txt";
 	
-	
-	public ResumeEvaluator(String content) {
-		options.add("tech");
-		options.add("bio");
-		options.add("business");
-		
-		try{
-			universityFileToHashMap();
-		} catch(Exception e) {
-			System.out.println("Error parsing university file: \n" + e);
-		}
-		try{
-			goodWordFileToHashSet();
-		} catch(Exception e) {
-			System.out.println("Error parsing good words file: \n" + e);
-		}
+	public ResumeEvaluator(String content, String type) {
 		
 		this.content = content;
+		
+ 		if (!type.equals("tech") && !type.equals("bio") && !type.equals("business")) {
+ 			System.out.println("Need argument; tech, business, or bio");
+ 			return;
+ 		} else { //set type
+ 	 		this.type = type;
+ 		}
 	}
 	
 	public String mostLikelyACT(String act1, String act2) {
@@ -69,17 +55,14 @@ public class ResumeEvaluator {
 			return act1;
 	}
 	
-	public String findACT() {
+	public void findACT() {
 		Pattern actPattern = Pattern.compile("(ACT|ACT:|ACT Score:)");
 		Matcher actMatcher = actPattern.matcher(content);
 		// only look at first instance
 		if (actMatcher.find()) {	        
 	        String prevString = numberWithinFiveChars(actMatcher.start(), -1);
 	        String nextString = numberWithinFiveChars(actMatcher.end(), 1);
-	        String act = mostLikelyACT(prevString, nextString);
-	        return act;
-		} else {
-			return null;
+	        act = Double.parseDouble(mostLikelyACT(prevString, nextString));
 		}
 	}
 	
@@ -143,17 +126,14 @@ public class ResumeEvaluator {
 		noWhitespace = content.split(regex);
 	}
 	
-	public String findGPA() {
+	public void findGPA() {
 		Pattern gpaPattern = Pattern.compile("(GPA|grade point average|GPA:)");		
 		Matcher gpaMatcher = gpaPattern.matcher(content);
 		// only look at first instance
 		if (gpaMatcher.find()) {	        
 	        String prevString = numberWithinFiveChars(gpaMatcher.start(), -1);
 	        String nextString = numberWithinFiveChars(gpaMatcher.end(), 1);
-	        String gpa = mostLikelyGPA(prevString, nextString);
-	        return gpa;
-		} else {
-			return null;
+	        gpa = Double.parseDouble(mostLikelyGPA(prevString, nextString));
 		}
 	}
 	
@@ -170,30 +150,44 @@ public class ResumeEvaluator {
 		bufRead.close();
 	}
 	
-	public void goodWordFileToHashSet() throws IOException {
+	public static void goodWordFileToHashSet() throws IOException {
 		FileReader input = new FileReader(wordsFolder + generalWordsFileName);
 		BufferedReader bufRead = new BufferedReader(input);
 		String myLine = null;
 
 		while ( (myLine = bufRead.readLine()) != null) {    
-		    goodWords.add(myLine);
+		    generalWords.add(myLine);
 		}
 		bufRead.close();
 	}
 	
-	public void specificWordFileToHashSet() throws IOException {
+	public static void specificWordFileToHashSet(String type) throws IOException {
 		FileReader input = new FileReader(wordsFolder + type + ".txt");
 		BufferedReader bufRead = new BufferedReader(input);
 		String myLine = null;
-
-		while ( (myLine = bufRead.readLine()) != null) {    
-		    goodWords.add(myLine);
+		HashSet<String> set = new HashSet<String>();
+		if (type == "bio")
+			set = bioWords;
+		else if (type == "tech")
+			set = techWords;
+		else if (type == "business")
+			set = businessWords;
+		
+		while ( (myLine = bufRead.readLine()) != null) {
+			set.add(myLine);
+				
 		}
 		bufRead.close();
 	}
 	
 	public void evaluateResume() {
-		
+		System.out.println(universityRanking);
+		System.out.println("resume text: " + content);
+		findGPA();
+		System.out.println("gpa: " + gpa);
+		findACT();
+		System.out.println("act: " + act);
+		System.out.println("num typos: " + numTypos);
 	}
 	
 	public void setNumTypos() throws FileNotFoundException {
@@ -208,32 +202,30 @@ public class ResumeEvaluator {
 		return new String(encoded, encoding);
 	}
 	
+	public static void makeHashMaps() {
+		
+		try{
+			specificWordFileToHashSet("bio");
+			specificWordFileToHashSet("tech");
+			specificWordFileToHashSet("business");
+		} catch(Exception e) {
+			System.out.println("Error parsing words files: \n" + e);
+		}
+	}
 	
 	public static void main(String[] args) throws JSONException {
+		
+		// as of now, args[0] is a path to a single PDF
+		// we should change this so that it is a path to a folder
+		// and then we can call the rest of this method on each file in that folder
+		
 		PdfParser parser = new PdfParser();
- 		String jsonString = parser.post1("weingart_resume.pdf");
+ 		String jsonString = parser.post1(args[0]);
  		String content = parser.extractText(jsonString);
-		ResumeEvaluator ev = new ResumeEvaluator(content);
 
- 		if (args.length < 1 || !ev.options.contains(args[1])) {
- 			System.out.println("Need argument; tech, business, or bio");
- 			return;
- 		}
- 		else { //set type
- 	 		ev.setType(args[1]);
- 		}
- 		
-		try{
-			ev.specificWordFileToHashSet();
-		} catch(Exception e) {
-			System.out.println("Error parsing " + ev.type + " words file: \n" + e);
-		}
-		System.out.println(ev.universityRanking);
-		System.out.println("resume text: " + ev.content);
-		String gpaString = ev.findGPA();
-		System.out.println(gpaString);
-		String actString = ev.findACT();
-		System.out.println(actString);
+ 		ResumeEvaluator ev = new ResumeEvaluator(content, args[1]);
+ 		ev.evaluateResume();
+		
 	}
 
 }
