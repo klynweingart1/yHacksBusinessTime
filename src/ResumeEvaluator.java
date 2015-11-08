@@ -218,13 +218,18 @@ public class ResumeEvaluator {
 		// as of now, args[0] is a path to a single PDF
 		// we should change this so that it is a path to a folder
 		// and then we can call the rest of this method on each file in that folder
-		
-		PdfParser parser = new PdfParser();
- 		String jsonString = parser.post1(args[0]);
- 		String content = parser.extractText(jsonString);
+		PdfParser parser;
+		String jsonString;
+		String content;
+		ResumeEvaluator ev;
+		for (int i = 1; i <= 50; i++){
+			parser = new PdfParser();
+	 		jsonString = parser.post1(args[0]+"res" + i + ".pdf");
+	 		content = parser.extractText(jsonString);
 
- 		ResumeEvaluator ev = new ResumeEvaluator(content, args[1]);
- 		ev.evaluateResume();
+	 		ev = new ResumeEvaluator(content, args[1]);
+	 		ev.evaluateResume();
+		}
 		
 	}
 
