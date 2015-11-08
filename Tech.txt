@@ -80,3 +80,4 @@ Coded
 Certified
 Effective
 Efficient
+Algorithmic
