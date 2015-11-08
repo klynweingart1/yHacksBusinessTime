@@ -10,28 +10,54 @@ import java.io.*;
 import org.json.JSONException;
 
 public class ResumeEvaluator {
+	
+	// Should this be static? Also, could it just be an array? 
+	// We only have three elements and they don't ever change.
 	ArrayList<String> options = new ArrayList<String>();
 	
+	// Instance variables. Should these be private?
 	String type;
-	String universityFile;
 	String content;
+	String[] noWhitespace;
+	double gpa;
+	int numTypos;
+	
+	/* Question: make these static? 
+	 * Thoughts: We only need to load the university file into the HashMap
+	 * once, so I think this should be static. As we have it set up now,
+	 * the goodWords HashSet is general good words plus the words specific
+	 * to the type of resume this is (tech, business, or bio), so this shouldn't
+	 * be static though unless we change how this is structured. 
+	 */
 	HashMap<String, Integer> wordFrequencies = new HashMap<String, Integer>();
 	HashMap<String, Integer> universityRanking = new HashMap<String, Integer>();
 	HashSet<String> goodWords = new HashSet<String>();
-	String[] noWhitespace;
-	String dictionaryFileName = "dictionary.txt";
-	String wordsFolder = "words/";
-	String generalWordsFileName = "general.txt";
-	int numTypos;
 	
-	public ResumeEvaluator(String content, String universityFile) {
+	static String dictionaryFileName = "dictionary.txt";
+	static String wordsFolder = "words/";
+	static String generalWordsFileName = "general.txt";
+	static String collegeRankingsFileName = "CollegeRanksV1.txt";
+	
+	
+	public ResumeEvaluator(String content) {
 		options.add("tech");
 		options.add("bio");
 		options.add("business");
 		
+		try{
+			universityFileToHashMap();
+		} catch(Exception e) {
+			System.out.println("Error parsing university file: \n" + e);
+		}
+		try{
+			goodWordFileToHashSet();
+		} catch(Exception e) {
+			System.out.println("Error parsing good words file: \n" + e);
+		}
+		
 		this.content = content;
-		this.universityFile = universityFile;
 	}
+	
 	public String mostLikelyACT(String act1, String act2) {
 		if (act1 == null)
 			return act2;
@@ -65,23 +91,23 @@ public class ResumeEvaluator {
 	public String numberWithinFiveChars(int index, int direction) {
 		int count = 0;
 		
-		//find start of GPA
+		//find start of number value
 		while (!Character.isDigit(content.charAt(index))) {
 			index += direction;
 			count++;
 			if(count > 5) return null;
 		}
-		//find end of GPA
-		int startIndex = index; //could be start or end of GPA
+		//find end of number value
+		int firstIndex = index; //could be start or end of number value
 		while ((Character.isDigit(content.charAt(index)) || content.charAt(index) == '.')) {
 			index += direction;
 			count++;
 		}
 		int secondIndex = index;
 		if (direction == 1) {
-			return content.substring(startIndex, secondIndex);
+			return content.substring(firstIndex, secondIndex);
 		} else {
-			return content.substring(secondIndex + 1, startIndex + 1);
+			return content.substring(secondIndex + 1, firstIndex + 1);
 		}
 		
 	}
@@ -132,7 +158,7 @@ public class ResumeEvaluator {
 	}
 	
 	public void universityFileToHashMap() throws NumberFormatException, IOException {
-		FileReader input = new FileReader(universityFile);
+		FileReader input = new FileReader(collegeRankingsFileName);
 		BufferedReader bufRead = new BufferedReader(input);
 		String myLine = null;
 
@@ -187,26 +213,16 @@ public class ResumeEvaluator {
 		PdfParser parser = new PdfParser();
  		String jsonString = parser.post1("weingart_resume.pdf");
  		String content = parser.extractText(jsonString);
-		ResumeEvaluator ev = new ResumeEvaluator(content, "CollegeRanksV1.txt");
+		ResumeEvaluator ev = new ResumeEvaluator(content);
 
- 		if(args.length < 1 || !ev.options.contains(args[1])) {
+ 		if (args.length < 1 || !ev.options.contains(args[1])) {
  			System.out.println("Need argument; tech, business, or bio");
  			return;
  		}
  		else { //set type
- 	 		ev.setType(args[0]);
+ 	 		ev.setType(args[1]);
  		}
  		
-		try{
-			ev.universityFileToHashMap();
-		} catch(Exception e) {
-			System.out.println("Error parsing university file: \n" + e);
-		}
-		try{
-			ev.goodWordFileToHashSet();
-		} catch(Exception e) {
-			System.out.println("Error parsing good words file: \n" + e);
-		}
 		try{
 			ev.specificWordFileToHashSet();
 		} catch(Exception e) {
