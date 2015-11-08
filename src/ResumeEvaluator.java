@@ -3,6 +3,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.regex.*;
 import java.io.*;
 
@@ -16,8 +17,11 @@ public class ResumeEvaluator {
 	String content;
 	HashMap<String, Integer> wordFrequencies = new HashMap<String, Integer>();
 	HashMap<String, Integer> universityRanking = new HashMap<String, Integer>();
+	HashSet<String> goodWords = new HashSet<String>();
 	String[] noWhitespace;
 	String dictionaryFileName = "dictionary.txt";
+	String wordsFolder = "words/";
+	String generalWordsFileName = "general.txt";
 	int numTypos;
 	
 	public ResumeEvaluator(String content, String universityFile) {
@@ -132,11 +136,32 @@ public class ResumeEvaluator {
 		BufferedReader bufRead = new BufferedReader(input);
 		String myLine = null;
 
-		while ( (myLine = bufRead.readLine()) != null)
-		{    
+		while ( (myLine = bufRead.readLine()) != null) {    
 		    String[] array = myLine.split("#");
 		    // check to make sure you have valid data
 		    universityRanking.put(array[0], Integer.parseInt(array[1]));
+		}
+		bufRead.close();
+	}
+	
+	public void goodWordFileToHashSet() throws IOException {
+		FileReader input = new FileReader(wordsFolder.concat(generalWordsFileName));
+		BufferedReader bufRead = new BufferedReader(input);
+		String myLine = null;
+
+		while ( (myLine = bufRead.readLine()) != null) {    
+		    goodWords.add(myLine);
+		}
+		bufRead.close();
+	}
+	
+	public void specificWordFileToHashSet() throws IOException {
+		FileReader input = new FileReader(wordsFolder.concat(type).concat(".txt"));
+		BufferedReader bufRead = new BufferedReader(input);
+		String myLine = null;
+
+		while ( (myLine = bufRead.readLine()) != null) {    
+		    goodWords.add(myLine);
 		}
 		bufRead.close();
 	}
